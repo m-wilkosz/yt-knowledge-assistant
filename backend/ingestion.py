@@ -1,4 +1,20 @@
+import os
+import tempfile
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.document_loaders import TextLoader
+from langchain.vectorstores import Pinecone
+from langchain.text_splitter import CharacterTextSplitter
+import pinecone
+from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
+from consts import INDEX_NAME
+
+load_dotenv()
+
+pinecone.init(
+    api_key=os.environ['PINECONE_API_KEY'],
+    environment=os.environ['PINECONE_ENVIRONMENT_REGION'],
+)
 
 def merge_chunks(data):
     merged_data = []
@@ -22,5 +38,25 @@ def merge_chunks(data):
     return merged_data
 
 def ingest_cc(video_id):
+    # get youtube video captions
     cc = YouTubeTranscriptApi.get_transcript(video_id)
     merged_cc = merge_chunks(cc)
+    string_cc = str(merged_cc)
+
+    # create temporary file from captions string, load it into document and split it
+    with tempfile.NamedTemporaryFile(delete=True, mode='w', suffix='.txt') as temp_file:
+        temp_file.write(string_cc)
+        temp_file.flush()
+
+        loader = TextLoader(temp_file.name)
+        loaded_cc = loader.load()
+
+        text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100, separator='}')
+        docs = text_splitter.split_documents(loaded_cc)
+
+    # create embeddings from docs and add them to vectorstore
+    embeddings = OpenAIEmbeddings()
+    Pinecone.from_documents(
+        docs, embeddings, index_name=INDEX_NAME
+    )
+    print(f'added {len(docs)} vectors to pinecone vectorstore')
