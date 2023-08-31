@@ -7,7 +7,7 @@ from langchain.text_splitter import CharacterTextSplitter
 import pinecone
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
-from consts import INDEX_NAME
+from backend.consts import INDEX_NAME
 
 load_dotenv()
 
