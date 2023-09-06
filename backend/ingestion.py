@@ -8,6 +8,7 @@ import pinecone
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
 from backend.consts import INDEX_NAME
+from backend.core import summary_chain
 
 load_dotenv()
 
@@ -54,9 +55,20 @@ def ingest_cc(video_id):
         text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100, separator='}')
         docs = text_splitter.split_documents(loaded_cc)
 
+        # create summary
+        summary_text_splitter = CharacterTextSplitter(
+                                        chunk_size=15000,
+                                        chunk_overlap=500,
+                                        separator='}'
+                                        )
+        docs_for_summary = summary_text_splitter.split_documents(loaded_cc)
+        summary = summary_chain(docs_for_summary)
+
     # create embeddings from docs and add them to vectorstore
     embeddings = OpenAIEmbeddings()
     Pinecone.from_documents(
         docs, embeddings, index_name=INDEX_NAME
     )
     print(f'added {len(docs)} vectors to pinecone vectorstore')
+
+    return summary
