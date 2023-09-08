@@ -40,7 +40,7 @@ def merge_chunks(data):
 
 def ingest_cc(video_id):
     # get youtube video captions
-    cc = YouTubeTranscriptApi.get_transcript(video_id)
+    cc = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US', 'en-GB'])
     merged_cc = merge_chunks(cc)
     string_cc = str(merged_cc)
 

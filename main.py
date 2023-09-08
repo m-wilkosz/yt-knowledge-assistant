@@ -1,4 +1,5 @@
 from typing import Set
+import time
 from backend.core import chat_chain
 from backend.ingestion import ingest_cc
 import streamlit as st
@@ -38,8 +39,13 @@ video_url = st.text_input('Enter YouTube video URL')
 video_id = extract_video_id(video_url) if video_url else None
 
 if video_id and (video_id != st.session_state.get('last_video_id')):
-    summary = ingest_cc(video_id)
-    st.session_state['last_video_id'] = video_id
+    st.session_state['chat_answers_history'] = []
+    st.session_state['user_prompt_history'] = []
+    st.session_state['chat_history'] = []
+
+    with st.spinner('Loading...'):
+        st.session_state['last_summary'] = ingest_cc(video_id)
+        st.session_state['last_video_id'] = video_id
 
 tab_chat, tab_summary = st.tabs(['Chat', 'Summary'])
 
@@ -54,9 +60,10 @@ if video_id:
             st.session_state['user_prompt_history'] = []
             st.session_state['chat_history'] = []
 
-        prompt = st.text_input('Prompt bar', placeholder='Send a message') or st.button(
-            'Submit'
-        )
+        if 'input_key' not in st.session_state:
+            st.session_state.input_key = 'initial'
+        prompt = (st.text_input('Prompt bar', key=st.session_state.input_key, placeholder='Send a message')
+                    or st.button('Submit'))
 
         if prompt:
             with st.spinner('Generating response...'):
@@ -79,6 +86,8 @@ if video_id:
                 st.session_state.user_prompt_history.append(prompt)
                 st.session_state.chat_answers_history.append(formatted_response)
 
+                st.session_state.input_key = str(time.time())
+
         if st.session_state['chat_answers_history']:
             for generated_response, user_query in zip(
                 st.session_state['chat_answers_history'],
@@ -96,4 +105,4 @@ if video_id:
                     seed='YT'
                 )
     with tab_summary:
-        st.write(summary)
+        st.write(st.session_state.get('last_summary'))
