@@ -12,6 +12,7 @@ jq = "*"
 tiktoken = "*"
 streamlit = "*"
 streamlit-chat = "*"
+youtube-transcript-api = "*"
 
 [dev-packages]
 
