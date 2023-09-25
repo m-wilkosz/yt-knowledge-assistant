@@ -19,12 +19,13 @@ pinecone.init(
     environment=os.environ['PINECONE_ENVIRONMENT_REGION'],
 )
 
-def chat_chain(query: str, chat_history: List[Dict[str, Any]] = []):
+def chat_chain(query: str, namespace: str, chat_history: List[Dict[str, Any]] = []):
     embeddings = OpenAIEmbeddings(openai_api_key=os.environ['OPENAI_API_KEY'])
 
     docsearch = Pinecone.from_existing_index(
         embedding=embeddings,
         index_name=INDEX_NAME,
+        namespace=namespace
     )
 
     chat = ChatOpenAI(

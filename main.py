@@ -68,7 +68,9 @@ if video_id:
         if prompt:
             with st.spinner('Generating response...'):
                 generated_response = chat_chain(
-                    query=prompt, chat_history=st.session_state['chat_history']
+                    query=prompt,
+                    chat_history=st.session_state['chat_history'],
+                    namespace=st.session_state['last_video_id'] or video_id,
                 )
 
                 timestamps = set(

@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
 from backend.consts import INDEX_NAME
 from backend.core import summary_chain
+import streamlit as st
 
 load_dotenv()
 
@@ -66,9 +67,23 @@ def ingest_cc(video_id):
 
     # create embeddings from docs and add them to vectorstore
     embeddings = OpenAIEmbeddings()
-    Pinecone.from_documents(
-        docs, embeddings, index_name=INDEX_NAME
+
+    texts = [d.page_content for d in docs]
+    metadatas = [d.metadata for d in docs]
+
+    pinecone_nmspc = Pinecone(
+        pinecone.Index(index_name=INDEX_NAME),
+        embedding=embeddings,
+        text_key='text',
+        namespace=video_id
     )
+
+    pinecone_nmspc.add_texts(
+        texts,
+        metadatas=metadatas,
+        namespace=video_id,
+    )
+
     print(f'added {len(docs)} vectors to pinecone vectorstore')
 
     return summary
