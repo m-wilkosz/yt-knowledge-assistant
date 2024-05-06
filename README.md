@@ -1,5 +1,5 @@
 # YouTube knowledge assistant
-[![](https://skills.thijs.gg/icons?i=py,bots)](https://skills.thijs.gg)
+[![](https://skillicons.dev/icons?i=py,bots)](https://skillicons.dev)
 
 ### Description
 This is a YouTube knowledge assistant. You can try it [here](https://yt-knowledge-assistant.streamlit.app/).
