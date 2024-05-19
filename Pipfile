@@ -13,9 +13,10 @@ tiktoken = "*"
 streamlit = "*"
 streamlit-chat = "*"
 youtube-transcript-api = "*"
+langchain-community = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
-python_full_version = "3.8.10"
+python_version = "3.11."
+python_full_version = "3.11.9"
