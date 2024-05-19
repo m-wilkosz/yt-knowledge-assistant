@@ -10,7 +10,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from backend.consts import INDEX_NAME
 from backend.core import summary_chain
 
-load_dotenv()
+load_dotenv(override=True)
 
 pc = Pinecone(api_key=os.environ['PINECONE_API_KEY'])
 if 'youtube-cc-index' not in pc.list_indexes().names():
