@@ -8,16 +8,21 @@ from langchain.chains.llm import LLMChain
 from langchain.schema.document import Document
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import Pinecone
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from backend.consts import INDEX_NAME
 from dotenv import load_dotenv
 
 load_dotenv()
 
-pinecone.init(
-    api_key=os.environ['PINECONE_API_KEY'],
-    environment=os.environ['PINECONE_ENVIRONMENT_REGION'],
-)
+pc = Pinecone(api_key=os.environ['PINECONE_API_KEY'])
+if 'youtube-cc-index' not in pc.list_indexes().names():
+    pc.create_index(
+        name='youtube-cc-index',
+        dimension=3072,
+        metric='euclidean',
+        spec=ServerlessSpec(
+            cloud='aws',
+            region=os.environ['PINECONE_ENVIRONMENT_REGION']))
 
 def chat_chain(query: str, namespace: str, chat_history: List[Dict[str, Any]] = []):
     embeddings = OpenAIEmbeddings(openai_api_key=os.environ['OPENAI_API_KEY'])
@@ -41,7 +46,7 @@ def chat_chain(query: str, namespace: str, chat_history: List[Dict[str, Any]] = 
     return qa({'question': query, 'chat_history': chat_history})
 
 def summary_chain(docs: List[Document]):
-    llm = ChatOpenAI(verbose=True, temperature=0, model_name='gpt-3.5-turbo-16k')
+    llm = ChatOpenAI(verbose=True, temperature=0, model_name='gpt-4o')
 
     first_prompt_template = (
         'Write a summary of the following first part of YouTube video transcript:\n'

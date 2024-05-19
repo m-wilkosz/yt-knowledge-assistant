@@ -2,21 +2,25 @@ import os
 import tempfile
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.document_loaders import TextLoader
-from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Pinecone as LangPC
 from langchain.text_splitter import CharacterTextSplitter
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
 from backend.consts import INDEX_NAME
 from backend.core import summary_chain
-import streamlit as st
 
 load_dotenv()
 
-pinecone.init(
-    api_key=os.environ['PINECONE_API_KEY'],
-    environment=os.environ['PINECONE_ENVIRONMENT_REGION'],
-)
+pc = Pinecone(api_key=os.environ['PINECONE_API_KEY'])
+if 'youtube-cc-index' not in pc.list_indexes().names():
+    pc.create_index(
+        name='youtube-cc-index',
+        dimension=3072,
+        metric='euclidean',
+        spec=ServerlessSpec(
+            cloud='aws',
+            region=os.environ['PINECONE_ENVIRONMENT_REGION']))
 
 def merge_chunks(data):
     merged_data = []
@@ -66,16 +70,16 @@ def ingest_cc(video_id):
         summary = summary_chain(docs_for_summary)
 
     # create embeddings from docs and add them to vectorstore
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(model='text-embedding-3-large')
 
     texts = [d.page_content for d in docs]
     metadatas = [d.metadata for d in docs]
 
-    pinecone_nmspc = Pinecone(
-        pinecone.Index(index_name=INDEX_NAME),
+    pinecone_nmspc = LangPC(
+        pc.Index(name=INDEX_NAME),
         embedding=embeddings,
         text_key='text',
-        namespace=video_id
+        namespace=video_id,
     )
 
     pinecone_nmspc.add_texts(
