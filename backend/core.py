@@ -7,12 +7,12 @@ from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains.llm import LLMChain
 from langchain.schema.document import Document
 from langchain.prompts import PromptTemplate
-from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Pinecone as LangPC
 from pinecone import Pinecone, ServerlessSpec
 from backend.consts import INDEX_NAME
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 pc = Pinecone(api_key=os.environ['PINECONE_API_KEY'])
 if 'youtube-cc-index' not in pc.list_indexes().names():
@@ -27,7 +27,7 @@ if 'youtube-cc-index' not in pc.list_indexes().names():
 def chat_chain(query: str, namespace: str, chat_history: List[Dict[str, Any]] = []):
     embeddings = OpenAIEmbeddings(openai_api_key=os.environ['OPENAI_API_KEY'])
 
-    docsearch = Pinecone.from_existing_index(
+    docsearch = LangPC.from_existing_index(
         embedding=embeddings,
         index_name=INDEX_NAME,
         namespace=namespace
