@@ -6,10 +6,10 @@ This is a YouTube knowledge assistant. You can try it [here](https://yt-knowledg
 
 ### Technologies
 The project was created with:
-- Python 3.8.10
-- LangChain 0.0.277
+- Python 3.11.9
+- LangChain 0.2
 - Streamlit 1.26.0
-- OpenAI API
+- OpenAI API (text-embedding-3-large & gpt-4o)
 - Pinecone
 
 ### Features
