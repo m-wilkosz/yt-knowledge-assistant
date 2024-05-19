@@ -25,7 +25,7 @@ if 'youtube-cc-index' not in pc.list_indexes().names():
             region=os.environ['PINECONE_ENVIRONMENT_REGION']))
 
 def chat_chain(query: str, namespace: str, chat_history: List[Dict[str, Any]] = []):
-    embeddings = OpenAIEmbeddings(openai_api_key=os.environ['OPENAI_API_KEY'])
+    embeddings = OpenAIEmbeddings(model='text-embedding-3-large', openai_api_key=os.environ['OPENAI_API_KEY'])
 
     docsearch = LangPC.from_existing_index(
         embedding=embeddings,
@@ -36,7 +36,7 @@ def chat_chain(query: str, namespace: str, chat_history: List[Dict[str, Any]] = 
     chat = ChatOpenAI(
         verbose=True,
         temperature=0,
-        model_name='gpt-3.5-turbo'
+        model_name='gpt-4o'
     )
 
     qa = ConversationalRetrievalChain.from_llm(
